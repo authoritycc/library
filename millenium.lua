@@ -511,7 +511,8 @@
             
             library[ "items" ] = library:create( "ScreenGui" , {
                 Parent = gethui() or coregui;
-                Name = "\0";
+                -- Name = "\0";
+                Name = "Authority.cc";
                 Enabled = true;
                 ZIndexBehavior = Enum.ZIndexBehavior.Global;
                 IgnoreGuiInset = true;
@@ -519,7 +520,7 @@
             
             library[ "other" ] = library:create( "ScreenGui" , {
                 Parent = gethui() or coregui;
-                Name = "\0";
+                Name = "Authority.cc";
                 Enabled = false;
                 ZIndexBehavior = Enum.ZIndexBehavior.Sibling;
                 IgnoreGuiInset = true;
