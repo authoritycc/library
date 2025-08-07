@@ -6,9 +6,6 @@
     -> Idk who or why this got leaked, ui was VERY popular and high in demand with customers
 ]]
 
--- credits finobe (https://github.com/i77lhm)
--- modified a tiny bit by me
-
 -- Variables 
     local uis = game:GetService("UserInputService") 
     local players = game:GetService("Players") 
@@ -3578,9 +3575,12 @@
             if success then
                 success, icon = pcall(icons.GetAsset, name)
                 if success then
+                    print(icon)
                     return icon 
                 end
             end
+
+            print(success)
 
             return nil 
         end 
