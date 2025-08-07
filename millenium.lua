@@ -6,6 +6,9 @@
     -> Idk who or why this got leaked, ui was VERY popular and high in demand with customers
 ]]
 
+-- modified a tiny bit by me, full credits to finobe (https://github.com/i77lhm)
+-- + library:fetch_icon (name) table: https://raw.githubusercontent.com/authoritycc/library/refs/heads/main/lucide/fetch.lua
+
 -- Variables 
     local uis = game:GetService("UserInputService") 
     local players = game:GetService("Players") 
@@ -793,7 +796,7 @@
                         BorderColor3 = rgb(0, 0, 0);
                         Parent = items[ "button" ];
                         AnchorPoint = vec2(0, 0.5);
-                        Image = "http://www.roblox.com/asset/?id=6034767608";
+                        Image = cfg.icon;
                         BackgroundTransparency = 1;
                         Position = dim2(0, 10, 0.5, 0);
                         Name = "\0";
@@ -1174,7 +1177,7 @@
                 side = properties.side or properties.Side or "left";
                 default = properties.default or properties.Default or false;
                 size = properties.size or properties.Size or self.size or 0.5; 
-                icon = properties.icon or properties.Icon or "http://www.roblox.com/asset/?id=6022668898";
+                icon = library:fetch_icon(properties.icon or properties.Icon);
                 fading_toggle = properties.fading or properties.Fading or false;
                 items = {};
             };
@@ -3568,21 +3571,16 @@
         end
 
         function library:fetch_icon(name)
+            
             local success, icons = pcall(function ()
                 return loadstring(game:HttpGet("https://raw.githubusercontent.com/authoritycc/library/refs/heads/main/lucide/fetch.lua"))()
             end)
 
             if success then
-                success, icon = pcall(icons.GetAsset, name)
-                if success then
-                    print(icon)
-                    return icon 
-                end
+                return icons.assets[`lucide-{name}`] or "http://www.roblox.com/asset/?id=6034767608"
             end
 
-            print(success)
-
-            return nil 
+            return "http://www.roblox.com/asset/?id=6034767608"
         end 
 
     --
