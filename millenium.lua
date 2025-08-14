@@ -7,8 +7,16 @@
 ]]
 
 -- modified a tiny bit by me, full credits to finobe (https://github.com/i77lhm)
--- + library:fetch_icon (name) table: https://raw.githubusercontent.com/authoritycc/library/refs/heads/main/lucide/fetch.lua
 
+--[[
+// Modifications: 
++ library:fetch_icon (name) table: https://raw.githubusercontent.com/authoritycc/library/refs/heads/main/lucide/fetch.lua
++ dropdown (multi) allow_null value
++ default menu bind key: enum.keycode.control
++ callback doesn't run on start-up (remove the getgenv().mileniumLoaded part from here) 
+]]
+
+getgenv().mileniumLoaded = false
 -- Variables 
     local uis = game:GetService("UserInputService") 
     local players = game:GetService("Players") 
@@ -81,6 +89,7 @@
         connections = {},   
         notifications = {notifs = {}},
         current_open; 
+        currentWindow = nil
     }
 
     local themes = {
@@ -165,13 +174,13 @@
 
     local fonts = {}; do
         function Register_Font(Name, Weight, Style, Asset)
-            if not isfile(Asset.Id) then
-                writefile(Asset.Id, Asset.Font)
+            if not isfile("milenium/fonts/" .. Asset.Id) then
+                writefile("milenium/fonts/" .. Asset.Id, Asset.Font)
             end
 
-            if isfile(Name .. ".font") then
-                delfile(Name .. ".font")
-            end
+            -- if isfile(Name .. ".font") then
+            --     delfile(Name .. ".font")
+            -- end
 
             local Data = {
                 name = Name,
@@ -185,20 +194,36 @@
                 },
             }
 
-            writefile(Name .. ".font", http_service:JSONEncode(Data))
+            writefile("milenium/fonts/" .. Name .. ".font", http_service:JSONEncode(Data))
 
-            return getcustomasset(Name .. ".font");
+            return getcustomasset("milenium/fonts/" .. Name .. ".font");
         end
         
-        local Medium = Register_Font("Medium", 200, "Normal", {
-            Id = "Medium.ttf",
-            Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/Inter_28pt-Medium.ttf"),
-        })
+        local Medium;
+        if isfile("milenium/fonts/Medium.ttf") then
+            Medium = Register_Font("Medium", 200, "Normal", {
+                Id = "Medium.ttf",
+                Font = readfile("milenium/fonts/Medium.ttf"),
+            })
+        else 
+            Medium = Register_Font("Medium", 200, "Normal", {
+                Id = "Medium.ttf",
+                Font =  game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/Inter_28pt-Medium.ttf"),
+            })
+        end 
 
-        local SemiBold = Register_Font("SemiBold", 200, "Normal", {
-            Id = "SemiBold.ttf",
-            Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/Inter_28pt-SemiBold.ttf"),
-        })
+        local SemiBold; 
+        if isfile("milenium/fonts/SemiBold.ttf") then
+            SemiBold = Register_Font("SemiBold", 200, "Normal", {
+                Id = "SemiBold.ttf",
+                Font = readfile("milenium/fonts/SemiBold.ttf"),
+            })
+        else 
+            SemiBold = Register_Font("SemiBold", 200, "Normal", {
+                Id = "SemiBold.ttf",
+                Font = game:HttpGet("https://github.com/i77lhm/storage/raw/refs/heads/main/fonts/Inter_28pt-SemiBold.ttf"),
+            })
+        end 
 
         fonts = {
             small = Font.new(Medium, Enum.FontWeight.Regular, Enum.FontStyle.Normal);
@@ -503,11 +528,14 @@
                 name = properties.name or properties.Name or "nebula";
                 game_name = properties.gameInfo or properties.game_info or properties.GameInfo or "Milenium for Counter-Strike: Global Offensive";
                 size = properties.size or properties.Size or dim2(0, 700, 0, 565);
+                toggle_bind = properties.toggle_bind or properties.toggle_Bind or properties.Toggle_Bind or properties.Toggle_bind or Enum.KeyCode.RightControl;
                 selected_tab;
                 items = {};
 
                 tween;
             }
+
+            library.currentWindow = cfg
             
             library[ "items" ] = library:create( "ScreenGui" , {
                 Parent = gethui() or coregui;
@@ -1633,6 +1661,8 @@
             end;
             
             function cfg.set(bool)
+                if getgenv().mileniumLoaded == false then return end 
+
                 if cfg.type == "checkbox" then 
                     library:tween(items[ "tick" ], {Rotation = bool and 0 or 45, ImageTransparency = bool and 0 or 1})
                     library:tween(items[ "toggle_button" ], {BackgroundColor3 = bool and themes.preset.accent or rgb(67, 67, 68)})
@@ -1860,6 +1890,8 @@
             end 
 
             function cfg.set(value)
+                if getgenv().mileniumLoaded == false then return end 
+
                 cfg.value = clamp(library:round(value, cfg.intervals), cfg.min, cfg.max)
 
                 library:tween(items[ "fill" ], {Size = dim2((cfg.value - cfg.min) / (cfg.max - cfg.min), cfg.value == cfg.min and 0 or -4, 0, 2)}, Enum.EasingStyle.Linear, 0.05)
@@ -1916,7 +1948,7 @@
                 callback = options.callback or function() end;
                 multi = options.multi or false;
                 scrolling = options.scrolling or false;
-
+                allow_null = options.allow_null or false; 
                 width = options.width or 130;
 
                 -- Ignore these 
@@ -2150,7 +2182,10 @@
                 end
             end
             
+            
             function cfg.set(value)
+                if getgenv().mileniumLoaded == false then return end 
+
                 local selected = {}
                 local isTable = type(value) == "table"
 
@@ -2163,6 +2198,10 @@
                         option.TextColor3 = rgb(72, 72, 73)
                     end
                 end
+
+                if #selected == 0 and cfg.allow_null == false then
+                    return
+                end 
 
                 items[ "sub_text" ].Text = isTable and concat(selected, ", ") or selected[1] or ""
                 flags[cfg.flag] = isTable and selected or selected[1]
@@ -2189,7 +2228,12 @@
                             local selected_index = find(cfg.multi_items, button.Text)
                             
                             if selected_index then 
-                                remove(cfg.multi_items, selected_index)
+                                if cfg.allow_null == false and #cfg.multi_items == 1 then
+                                    cfg.set(cfg.multi_items) 
+                                    return 
+                                else 
+                                    remove(cfg.multi_items, selected_index)
+                                end 
                             else
                                 insert(cfg.multi_items, button.Text)
                             end
@@ -2701,6 +2745,7 @@
             end
 
             function cfg.set(color, alpha)
+                if getgenv().mileniumLoaded == false then return end 
                 if type(color) == "boolean" then 
                     return
                 end 
@@ -2916,6 +2961,8 @@
             end 
             
             function cfg.set(text) 
+                if getgenv().mileniumLoaded == false then return end 
+
                 flags[cfg.flag] = text
 
                 items[ "input" ].Text = text
@@ -3175,6 +3222,8 @@
             end 
 
             function cfg.set(input)
+                if getgenv().mileniumLoaded == false then return end 
+
                 if type(input) == "boolean" then 
                     cfg.active = input
 
@@ -3337,6 +3386,8 @@
             end 
 
             items[ "button" ].MouseButton1Click:Connect(function()
+                if getgenv().mileniumLoaded == false then return end 
+
                 cfg.callback()
 
                 items[ "name" ].TextColor3 = themes.preset.accent 
@@ -3519,6 +3570,8 @@
                     });     
 
                     button.MouseButton1Click:Connect(function()
+                        if getgenv().mileniumLoaded == false then return end 
+
                         local current = cfg.current_element 
                         if current and current ~= name then 
                             library:tween(current, {TextColor3 = rgb(72, 72, 72)})
@@ -3568,13 +3621,17 @@
             section:button({name = "Load", callback = function() library:load_config(readfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg"))  library:update_config_list() notifications:create_notification({name = "Configs", info = "Loaded config:\n" .. flags["config_name_list"]}) end})
             section:button({name = "Delete", callback = function() delfile(library.directory .. "/configs/" .. flags["config_name_list"] .. ".cfg")  library:update_config_list() notifications:create_notification({name = "Configs", info = "Deleted config:\n" .. flags["config_name_list"]}) end})
             section:colorpicker({name = "Menu Accent", callback = function(color, alpha) library:update_theme("accent", color) end, color = themes.preset.accent})
-            section:keybind({name = "Menu Bind", callback = function(bool) window.toggle_menu(bool) end, default = true})
+            local menuBind = section:keybind({name = "Menu Bind", default = true})
+            menuBind.callback = function(bool) 
+                library.currentWindow.toggle_bind = menuBind.key
+                window.toggle_menu(bool); 
+            end
         end
 
         function library:fetch_icon(name)
-            
             local success, icons = pcall(function ()
                 return loadstring(game:HttpGet("https://raw.githubusercontent.com/authoritycc/library/refs/heads/main/lucide/fetch.lua"))()
+                -- return loadstring(game:HttpGet("http://localhost:3000/icons"))()
             end)
 
             if success then
@@ -3742,7 +3799,18 @@
                 items[ "notification" ]:Destroy() 
             end)
         end
+
+        uis.InputBegan:Connect(function(input, gameProcessedEvent)
+            if gameProcessedEvent then return end 
+
+            if library.currentWindow then
+                if input.KeyCode == library.currentWindow.toggle_bind then
+                    library[ "items" ].Enabled = not library[ "items" ].Enabled
+                end 
+            end
+        end)
     --
 -- 
 
+getgenv().mileniumLoaded = true 
 return library
