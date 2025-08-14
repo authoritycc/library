@@ -3,8 +3,14 @@ Yun Founders: flash#9999, loris#9547, worldwide#0001 , Saul Goodman#2345
 Yun Devs: zomb#7741, nives#0001, loot#1337
 Special Thanks To: Qw#1549
 --]]
+
+--[[ 
+// modified: 
+- + multidropdown "allowNull"
+]]
+
 function initLibrary()
-    local folderName = "epic config folder"
+    local folderName = "authority.cc"
 
 
     if not isfolder(folderName) then
@@ -20,10 +26,10 @@ function initLibrary()
     end
 
 
-    local inputService = game:GetService("UserInputService")
-    local tweenService = game:GetService("TweenService")
-    local runService = game:GetService("RunService")
-    local coreGui = game:GetService("CoreGui")
+    local inputService = cloneref(game:GetService("UserInputService"))
+    local tweenService = cloneref(game:GetService("TweenService"))
+    local runService = cloneref(game:GetService("RunService"))
+    local coreGui = cloneref(game:GetService("CoreGui"))
 
 
     local utility = {}
@@ -196,7 +202,7 @@ function initLibrary()
     end
 
 
-    gui.Parent = coreGui
+    gui.Parent = gethui() or coreGui
 
 
     local flags = {toggles = {}, boxes = {}, sliders = {}, dropdowns = {}, multidropdowns = {}, keybinds = {}, colorpickers = {}}
@@ -1625,7 +1631,7 @@ function initLibrary()
                     local content = options.content or {}
                     local multiChoice = options.multiChoice or false
                     local allowNull = options.allowNull or false
-                    local default = (options.default and table.find(content, options.default)) or (multiChoice and {} or nil)
+                    local default = (options.default and table.find(content, options.default)) or (multiChoice and options.default or {})
                     local flag = options.flag
                     local callback = options.callback or function() end
 
@@ -1834,7 +1840,7 @@ function initLibrary()
                                     callback(chosen)
                                 else
                                     if allowNull == false and #chosen == 1 then return end 
-                                    
+
                                     table.remove(chosen, table.find(chosen, opt))
 
 
