@@ -7,6 +7,7 @@ Special Thanks To: Qw#1549
 --[[ 
 // modified: 
 - + multidropdown "allowNull"
+- + some other things
 ]]
 
 function initLibrary()
@@ -1115,7 +1116,8 @@ function initLibrary()
                     local options = utility.table(opts)
                     local min = options.min or 0
                     local max = options.max or 100
-                    local valueText = options.valueText or "Slider: [VALUE]/" .. tostring(max)
+                    local name = (options.name or options.Name or options.valueText)
+                    local valueText = name and name .. ": [VALUE]/" .. tostring(max) or "Slider"
                     local default = options.default or math.clamp(0, min, max)
                     local decimals = options.decimals or 0.1
                     local flag = options.flag
@@ -1631,16 +1633,14 @@ function initLibrary()
                     local content = options.content or {}
                     local multiChoice = options.multiChoice or false
                     local allowNull = options.allowNull or false
-                    local default = (options.default and table.find(content, options.default)) or (multiChoice and options.default or {})
+                    local default = ((options.default or options.Default) and content[table.find(content, (options.default or options.Default))]) or (multiChoice and (options.default or options.Default) or {})
                     local flag = options.flag
                     local callback = options.callback or function() end
-
-
-
 
                     if flag then
                         library.flags[flag] = default
                     end
+
                     callback(default)
 
 
@@ -1649,6 +1649,10 @@ function initLibrary()
 
                     local current = default
                     local chosen = {}
+
+                    if multiChoice and default then
+                        chosen = default
+                    end
 
 
                     local dropdownHolder = utility.create("Frame", {
