@@ -248,17 +248,21 @@ tbl.Elements = {
 	MainFrame = Main
 }
 
-tbl.UpdateText = function (TextName, NewText)
+tbl.UpdateText = function (TextName: string, NewText: string)
 	tbl.Elements.Text[TextName].Text = NewText
 end
 
-tbl.SetIcon = function (UserId)
+tbl.SetIcon = function (UserId: number)
 	tbl.Elements.Image.Icon.BackgroundTransparency = 1
 	if UserId == -1 then
 		tbl.Elements.Image.Icon.Image = 'rbxassetid://81489458260315'
 	else 
 		tbl.Elements.Image.Icon.Image = 'rbxthumb://type=AvatarHeadShot&id=' .. UserId .. '&w=420&h=420'
 	end
+end
+
+tbl.SetVisible = function (Bool: boolean) 
+	tbl.Elements.MainFrame.Visible = false
 end
 
 return tbl 
