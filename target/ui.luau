@@ -24,8 +24,8 @@ local Bot = Instance.new("TextLabel")
 
 --Properties:
 
-AuthorityccHealthGui.Name = "Authority.cc Health Gui"
-AuthorityccHealthGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+AuthorityccHealthGui.Name = "TargetGui"
+AuthorityccHealthGui.Parent = gethui()
 AuthorityccHealthGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Main.Name = "Main"
