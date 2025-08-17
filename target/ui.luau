@@ -25,7 +25,7 @@ local Bot = Instance.new("TextLabel")
 --Properties:
 
 AuthorityccHealthGui.Name = "Authority.cc Health Gui"
-AuthorityccHealthGui.Parent = gethui() or cloneref(game:GetService("CoreGui"))
+AuthorityccHealthGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 AuthorityccHealthGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 Main.Name = "Main"
@@ -262,7 +262,7 @@ tbl.SetIcon = function (UserId: number)
 end
 
 tbl.SetVisible = function (Bool: boolean) 
-	tbl.Elements.MainFrame.Visible = false
+	Main.Visible = false
 end
 
 return tbl 
